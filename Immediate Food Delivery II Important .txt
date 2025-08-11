@@ -1,0 +1,8 @@
+with FirstOrder as (
+ SELECT delivery_id,customer_id,order_date,customer_pref_delivery_date,
+ Row_number() over (partition by customer_id order by order_date asc ) as rn
+ from Delivery 
+)
+select  round(count (Case when order_date = customer_pref_delivery_date then 1 else null end)*1.0/count(*)*100.00,2) as immediate_percentage
+from FirstOrder
+where rn=1
