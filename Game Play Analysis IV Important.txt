@@ -1,0 +1,23 @@
+WITH first_login AS (
+    SELECT 
+        player_id, 
+        MIN(event_date) AS first_date
+    FROM Activity 
+    GROUP BY player_id
+),
+second_login AS (
+    SELECT 
+        f.player_id
+    FROM first_login f
+    INNER JOIN Activity a
+        ON a.player_id = f.player_id  
+       AND a.event_date = DATEADD(day, 1, f.first_date)
+)
+SELECT 
+    ROUND(
+        COUNT(DISTINCT s.player_id) * 1.0 / COUNT(DISTINCT a.player_id), 
+        2
+    ) AS fraction
+FROM Activity a
+LEFT JOIN second_login s 
+    ON a.player_id = s.player_id;
