@@ -1,0 +1,12 @@
+with new_table as (select *
+from Products 
+where change_date <= '2019-08-16')
+, other as (
+select p.product_id, max(n.change_date) as maxDate
+from Products p left join new_table n
+on p.product_id  = n.product_id 
+group by p.product_id)
+
+select o.product_id , case when p.new_price is null then 10 else p.new_price end as price
+from Products p right join other o
+on p.product_id  = o.product_id and p.change_date = o.maxDate
