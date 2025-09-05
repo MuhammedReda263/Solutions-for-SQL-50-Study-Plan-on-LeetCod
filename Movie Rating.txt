@@ -1,0 +1,28 @@
+with cte1 as (select u.name, m.user_id , count(m.rating) as numsOfFilms 
+from MovieRating m inner join Users u on m.user_id = u.user_id
+group by u.name, m.user_id
+),
+
+cte2 as (select mr.movie_id, m.title ,avg(mr.rating*1.0) as avgRating     
+from MovieRating mr inner join Movies m on mr.movie_id = m.movie_id
+where mr.created_at between '2020-02-01' and '2020-02-28'
+group by mr.movie_id,m.title
+),
+
+topUser AS (select top 1 name as results  
+from cte1 
+where numsOfFilms= (select max(numsOfFilms) from cte1)
+order by name
+),
+
+topMovie AS (select top 1 title as results
+from cte2
+where avgRating = (select max(avgRating) from cte2)
+order by title
+)
+
+select results
+from topUser
+union all
+select results
+from topMovie
